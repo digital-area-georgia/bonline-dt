@@ -1,0 +1,28 @@
+﻿@model BONLINE_DT.Pages.IndexModel
+
+<div class="row">
+    <div class="col-6">
+        <h3>კრედიტი: @Model.Document.Document.Credit</h3>
+    </div>
+    <div class="col-6">
+        <h3>ოდენობა(ლარში): @Model.Document.Document.AmountBase</h3>
+    </div>
+    <div class="col-12 m-2">
+        <h5 class="card-title">ჩარიცხვის უნიკალური ნომერი (ბანკში): @Model.Document.Document.DocKey</h5>
+        <h5 class="card-title">ჩარიცხვის ნომერი : @Model.Document.Document.DocNo</h5>
+    </div>
+    <div class="col-6">
+        <ul class="list-group">
+            <li class="list-group-item"><b>დასახელება</b>: @Model.Document.Document.Sender.Name</li>
+          <li class="list-group-item"><b>ანგარიშის ნომერი</b>: @Model.Document.Document.Sender.AccountNumber</li>
+          <li class="list-group-item"><b>ბანკის კოდი</b>: @Model.Document.Document.Sender.BankCode</li>
+          <li class="list-group-item"><b>ბანკის დასახელება</b>: @Model.Document.Document.Sender.BankName</li>
+        </ul>
+    </div>
+    <div class="col-6">
+        <ul class="list-group">
+            <li class="list-group-item">@Model.Document.Document.EntryComment</li>
+            <li class="list-group-item">@Model.Document.Document.EntryCommentEn</li>
+        </ul>
+    </div>
+</div>

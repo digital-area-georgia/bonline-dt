@@ -1,0 +1,146 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+
+<table class="table table-hover table-vcenter js-dataTable-full" id="Documents-DT">
+    <thead class="bg-body-light">
+    <tr>
+        <th class="text-center"></th>
+        <th>ჩაწერის თარიღი</th>
+        <th>კრედიტი</th>
+        <th>აღწერა</th>
+    </tr>
+    </thead>
+    <tfoot style="display: table-header-group;">
+    <tr>
+        <th class="text-center"></th>
+        <th>ჩაწერის თარიღი</th>
+        <th>კრედიტი</th>
+        <th>აღწერა</th>
+    </tr>
+    </tfoot>
+    <tbody></tbody>
+</table>
+
+
+<div class="modal fade bd-example-modal-lg" id="DocumentModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content" >
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">დოკუმენტის დეტალები</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        
+        <div class="modal-body" id="DocumentModalBody">
+          
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">დახურვა</button>
+        </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts{
+<script type="text/javascript">
+    function InitializeDatatable() {
+        jQuery(function ($) {
+            //initiate dataTables plugin
+            var dataTable =
+                $('#Documents-DT')
+                    .DataTable({
+                        "proccessing": true,
+                        "serverSide": true,
+                        "ajax": {
+                            url: "/Index",
+                            type: 'POST',
+                            headers: { 'RequestVerificationToken': $('@Html.AntiForgeryToken()').val() }
+                        },
+                        'createdRow': function (row, data, dataIndex) {
+                            if (data.isRead == false) {
+                                return $(row).attr('onclick', 'ShowModal(\'' + data.id + '\');').attr('class', 'bg-secondary');
+                            }
+                            else {
+                                return $(row).attr('onclick', 'ShowModal(\'' + data.id + '\');');
+                            }
+                        },
+                        "columnDefs": [
+                            { "name": "Id", "data": "id", "targets": 0, "visible": false },
+                            { "name": "Document.PostDate", "data": "documentCreateDateLocal", "targets": 1},
+                            { "name": "Document.Credit", "data": "document.credit", "targets": 2 },
+                            { "name": "Document.EntryComment", "data": "document.entryComment", "targets": 3 }
+                        ],
+                        dom: 'Blftip',
+                        buttons: [
+                            { extend: 'copy', className: 'btn btn-outline-primary' },
+                            { extend: 'excel', className: 'btn btn-outline-success' },
+                            { extend: 'print', className: 'btn btn-outline-secondary' }
+                        ],
+                        "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                        autoWidth: false,
+                        pageLength: 50,
+                        language: {
+                            search: "_INPUT_",
+                            searchPlaceholder: "ძიება...",
+                            lengthMenu: "_MENU_",
+                            info: "ნაჩვენებია _START_-დან _END_-მდე ჩანაწერი, სულ _TOTAL_ ჩანაწერი",
+                            infoEmpty: "ჩანაწერი არ მოიძებნა",
+                            "paginate": {
+                                "first": "პირველი",
+                                "last": "ბოლო",
+                                "next": "შემდეგი",
+                                "previous": "წინა"
+                            },
+                        },
+                        "order": [[0, "desc"]]
+                    });
+            
+            $(document).ready(function () {
+                // Setup - add a text input to each footer cell
+                $('#Documents-DT tfoot th').slice(0, 6).each(function () {
+                    var title = $(this).text();
+                        
+                    $(this).html('<input type="text" class=" form-control"  placeholder="ჩაწერე..." />');
+                });
+
+                dataTable.buttons().container().appendTo('#tbtns');
+                // Apply the search
+                dataTable.columns().every(function () {
+                    var that = this;
+
+                    $('input', this.footer()).on('keyup change clear', function () {
+                        if (that.search() !== this.value) {
+                            that
+                                .search(this.value)
+                                .draw();
+                        }
+                    });
+                });
+            });
+        });
+    }
+
+    InitializeDatatable();
+    
+    $('#DocumentModal').on('hidden.bs.modal', function (e) {
+        if ($.fn.DataTable.isDataTable("#Documents-DT")) {
+                $('#Documents-DT').DataTable().clear().destroy();
+            }
+        InitializeDatatable();
+    });
+
+    function ShowModal(Id) {
+        $.get('/Index', { Handler: "ModalView", Id: Id }, function (result) {
+            $('#DocumentModalBody').html(result);
+            $('#DocumentModal').modal('toggle');
+        });
+    }
+</script>
+
+}
